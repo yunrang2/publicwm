@@ -229,10 +229,10 @@
                 ];
             } else if (type === 'timer') {
                 buttons = [
-                    { text: '20초', action: () => createTimer(20) },
-                    { text: '30초', action: () => createTimer(30) },
-                    { text: '1분', action: () => createTimer(60) },
-                    { text: '30분', action: () => createTimer(1800) },
+                    { text: '20초', action: () => createOrUpdateTimer(20) },
+                    { text: '30초', action: () => createOrUpdateTimer(30) },
+                    { text: '1분', action: () => createOrUpdateTimer(60) },
+                    { text: '30분', action: () => createOrUpdateTimer(1800) },
                     { text: '직접 설정', action: openCustomTimerModal }
                 ];
             }
@@ -311,6 +311,19 @@
             playAudio('https://raw.githubusercontent.com/yunrang2/upload/master/뿌에.mp3');
         }
 
+        // 타이머를 새로 만들거나 추가
+        function createOrUpdateTimer(duration) {
+            let timer = timers.find(t => t.active); // 이미 동작 중인 타이머 찾기
+            if (timer) {
+                // 남은 시간에 추가
+                timer.remaining += duration;
+                timer.element.textContent = formatTime(timer.remaining);
+            } else {
+                // 새 타이머 생성
+                createTimer(duration);
+            }
+        }
+
         function createTimer(duration) {
             let timerBox = document.createElement('div');
             timerBox.className = 'timer-box';
@@ -378,7 +391,7 @@
             const seconds = parseInt(document.getElementById('custom-seconds').value, 10);
             const duration = (minutes * 60) + seconds;
             document.getElementById('input-timer-modal').style.display = 'none';
-            createTimer(duration);
+            createOrUpdateTimer(duration);
         }
     </script>
 </head>

@@ -59,6 +59,15 @@
         .bottom-right button span {
             text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
         }
+        /* 게임 버튼 컨테이너 */
+        .game-buttons {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: flex-end;
+        }
+        /* 동적 버튼들 */
         .dynamic-buttons {
             position: absolute;
             top: 0;
@@ -113,6 +122,7 @@
             font-family: 'DNFBitBit', Arial, sans-serif;
             text-shadow: 1px 1px 1px #000;
         }
+        /* 타이머 박스 */
         .timer-box {
             display: none;
             position: fixed;
@@ -135,6 +145,7 @@
             75% { transform: translateX(-2px); }
             100% { transform: translateX(2px); }
         }
+        /* 직접 설정 모달 */
         .input-timer-modal {
             display: none;
             position: absolute;
@@ -161,6 +172,60 @@
             border-radius: 5px;
             border: 2px solid #666;
         }
+        /* 게임 버튼들 */
+        .game-buttons button {
+            background-color: #FF1493;
+            border: 2px solid #000;
+            color: white;
+            padding: 10px 20px;
+            font-size: 18px;
+            width: 150px;
+            cursor: pointer;
+            border-radius: 5px;
+            text-shadow: 1px 1px 1px #000;
+            box-shadow: 0 4px #666;
+            font-family: 'DNFBitBit', Arial, sans-serif;
+            transition: background-color 0.2s ease;
+        }
+        .game-buttons button:hover {
+            background-color: #FF69B4;
+        }
+        /* 모달 창 */
+        .modal-window {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, 50%);
+            width: 600px;
+            height: 400px;
+            background-color: white;
+            border: 2px solid #000;
+            box-shadow: 0 4px 11px rgba(0,0,0,0.2);
+            border-radius: 11px;
+            padding: 20px;
+            z-index: 2000;
+            display: none;
+            resize: both;
+            overflow: auto;
+        }
+        .modal-window iframe {
+            width: 100%;
+            height: 90%;
+            border: none;
+        }
+        .modal-window .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #FF4500;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-family: 'DNFBitBit', Arial, sans-serif;
+            font-size: 16px;
+        }
     </style>
     <script>
         let timers = [];
@@ -177,8 +242,25 @@
         // 현재 활성화된 버튼
         let activeButton = null;
 
+        // 현재 열린 게임 창
+        let currentGameWindow = null;
+
+        // 모달 창 요소
+        const modal = {
+            element: null,
+            iframe: null,
+            closeButton: null
+        };
+
+        window.onload = function() {
+            modal.element = document.getElementById('modal-window');
+            modal.iframe = modal.element.querySelector('iframe');
+            modal.closeButton = modal.element.querySelector('.close-modal');
+            modal.closeButton.onclick = closeModal;
+        };
+
         function toggleContentVisibility() {
-            const elements = document.querySelectorAll('.bottom-right, .modal, .dynamic-buttons, .timer-box');
+            const elements = document.querySelectorAll('.bottom-right, .modal, .dynamic-buttons, .timer-box, .game-buttons, .modal-window');
             elements.forEach(element => {
                 if (!element.classList.contains('return-button')) {
                     element.style.display = contentVisible ? 'none' : '';
@@ -308,7 +390,7 @@
         }
 
         function playPpuwe() {
-            playAudio('https://raw.githubusercontent.com/yunrang2/upload/master/뿌에.mp3');
+            playAudio(document.querySelector('.reaction-button[innerText="뿌에"]'), 'https://raw.githubusercontent.com/yunrang2/upload/master/뿌에.mp3');
         }
 
         // 타이머를 새로 만들거나 추가
@@ -393,22 +475,54 @@
             document.getElementById('input-timer-modal').style.display = 'none';
             createOrUpdateTimer(duration);
         }
+
+        // 게임 버튼 기능
+        function toggleGameButtons() {
+            const gameButtons = document.getElementById('game-buttons');
+            gameButtons.style.display = gameButtons.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function openModalWindow(url) {
+            // 기존 창 닫기
+            modal.iframe.src = url;
+            modal.element.style.display = 'block';
+        }
+
+        function closeModal() {
+            modal.element.style.display = 'none';
+            modal.iframe.src = '';
+        }
     </script>
 </head>
 <body>
     <div class="canvas">
         <div class="bottom-right">
+            <!-- 게임 버튼 -->
+            <button id="game-btn" onclick="toggleGameButtons()"><span>게임</span></button>
+            <div id="game-buttons" class="game-buttons">
+                <button onclick="openModalWindow('https://yunrang2.github.io/jdlotto15/')">로또</button>
+                <button onclick="openModalWindow('https://yunrang2.github.io/ScrachL/')">스피또</button>
+                <button onclick="openModalWindow('https://yunrang2.github.io/popbingo.io/')">빙고</button>
+            </div>
+            <!-- 기존 버튼들 -->
             <button id="timer-btn" onclick="showDynamicButtons('timer')"><span>타이머</span></button>
             <button id="bgm-btn" onclick="showDynamicButtons('bgm')"><span>브금</span></button>
             <button id="reaction-btn" onclick="showDynamicButtons('reaction')"><span>리액션</span></button>
         </div>
         <button id="return-button" class="return-button" onclick="toggleContentVisibility()">돌아가기</button>
 
+        <!-- 타이머 직접 설정 모달 -->
         <div id="input-timer-modal" class="input-timer-modal">
             <div>타이머 직접 설정</div>
             <input id="custom-minutes" class="input-timer" type="number" placeholder="분" min="0">
             <input id="custom-seconds" class="input-timer" type="number" placeholder="초" min="0" max="59">
             <button onclick="setCustomTimer()">설정</button>
+        </div>
+
+        <!-- 빙고 게임 모달 창 -->
+        <div id="modal-window" class="modal-window">
+            <button class="close-modal">닫기</button>
+            <iframe src="" frameborder="0"></iframe>
         </div>
     </div>
 </body>

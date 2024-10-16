@@ -306,6 +306,7 @@
                     { text: '코카인', audio: 'https://raw.githubusercontent.com/yunrang2/upload/master/코카인.mp3' },
                     { text: '제로콕', audio: 'https://raw.githubusercontent.com/yunrang2/upload/master/제로콕.mp3' },
                     { text: '여봉봉', audio: 'https://raw.githubusercontent.com/yunrang2/upload/master/여봉봉.mp3' },
+                    { text: '괴짜가족', audio: 'https://raw.githubusercontent.com/yunrang2/upload/master/괴짜가족.mp3' },
                     { text: '뿌에', action: playPpuwe },
                     { text: '중지', action: stopAudio }
                 ];
@@ -356,7 +357,7 @@
             if (!currentAudio || currentAudio.src !== src) {
                 currentAudio = new Audio(src);
             }
-            currentAudio.loop = false;
+            currentAudio.loop = true;
             currentAudio.volume = 0.8;
             currentAudio.play();
 

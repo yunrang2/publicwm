@@ -263,6 +263,40 @@
             --hover-color: #FF69B4;
             --active-color: #FFD700;
         }
+
+        .theme-toggle {
+            position: absolute;
+            bottom: 20px;      /* 아래에서 20px */
+            left: 20px;        /* 왼쪽에서 20px */
+            width: 50px;
+            height: 50px;
+            padding: 0;
+            font-size: 0;      /* 글자 안 보이게 */
+            background: rgba(0, 0, 0, 0.3) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/200200/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="%23fff" stroke-width="8"/><path d="M50 10 A40 40 0 1 1 50 90" fill="none" stroke="%23fff" stroke-width="8"/><circle cx="50" cy="30" r="8" fill="%23fff"/></svg>') center/30px no-repeat;
+            border: 3px solid rgba(255,255,255,0.4);
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 9999;
+            transition: all 0.4s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        /* 마우스 올리면 살짝 드러남 */
+        .theme-toggle:hover {
+            width: 130px;
+            border-radius: 30px;
+            background-color: rgba(0, 0, 0, 0.7) !important;
+            font-size: 18px;
+            padding: 0 10px;
+            background-image: none !important;
+        }
+
+        .theme-toggle:hover::after {
+            content: '랜덤테마';
+            color: white;
+            font-family: 'DNFBitBit', sans-serif;
+            text-shadow: 2px 2px 0 #000;
+        }
     </style>
     <script>
         let timers = [];

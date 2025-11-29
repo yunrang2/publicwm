@@ -295,6 +295,7 @@
                     { text: '황당', audio: 'https://raw.githubusercontent.com/yunrang2/upload/master/황당.mp3' },
                     { text: '멸망', audio: 'https://raw.githubusercontent.com/yunrang2/upload/master/멸망.mp3' },
                     { text: '반야심경', audio: 'https://raw.githubusercontent.com/yunrang2/upload/master/반야심경리믹스.mp3' },
+                    { text: '콘 터졌을 때', action: playRandomKonBGM},
                     { text: '중지', action: stopAudio }
                 ];
             } else if (type === 'reaction') {
@@ -492,6 +493,84 @@
         function closeModal() {
             modal.element.style.display = 'none';
             modal.iframe.src = '';
+        }
+
+        // 콘 터졌을 때 전용 랜덤 재생 함수
+        async function playRandomKonBGM() {
+            // 이미 로딩 중이면 중복 방지
+            if (window.konBGMList) {
+                playOneRandomKon();
+                return;
+            }
+
+            // 로딩 중 표시 (선택사항)
+            const loadingBtn = Array.from(document.querySelectorAll('#dynamic-buttons button'))
+                .find(b => b.textContent === '콘 터졌을 때');
+            if (loadingBtn) loadingBtn.textContent = '콘 터졌을 때 (로딩중...)';
+
+            try {
+                // 1. raw 파일 목록 가져오기 (GitHub API 사용)
+                const response = await fetch('https://api.github.com/repos/yunrang2/konbgm/contents');
+                const files = await response.json();
+
+                // 2. .mp3 파일만 필터링해서 raw URL 만들기
+                const mp3Files = files
+                    .filter(file => file.name.endsWith('.mp3'))
+                    .map(file => `https://raw.githubusercontent.com/yunrang2/konbgm/main/${encodeURIComponent(file.name)}`);
+
+                if (mp3Files.length === 0) {
+                    alert('콘 터졌을 때 노래가 없어요ㅠ');
+                    return;
+                }
+
+                window.konBGMList = mp3Files; // 캐시해두기 (다시 안 불러오게)
+                playOneRandomKon();
+
+                if (loadingBtn) loadingBtn.textContent = '콘 터졌을 때';
+
+            } catch (e) {
+                console.error(e);
+                alert('콘 터졌을 때 노래 불러오기 실패ㅠ 인터넷 확인해보세요!');
+                if (loadingBtn) loadingBtn.textContent = '콘 터졌을 때';
+            }
+        }
+
+        // 실제로 하나 랜덤 재생 + 끝나면 또 랜덤 재생 (무한 루프)
+        function playOneRandomKon() {
+            if (!window.konBGMList || window.konBGMList.length === 0) return;
+
+            const randomIndex = Math.floor(Math.random() * window.konBGMList.length);
+            const randomURL = window.konBGMList[randomIndex];
+
+            // 기존 오디오 정지
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+            }
+
+            currentAudio = new Audio(randomURL);
+            currentAudio.loop = false;  // 한 곡 끝나면 다음 곡 자동 재생
+            currentAudio.volume = 0.8;
+
+            // 버튼 활성화 표시
+            const konBtn = Array.from(document.querySelectorAll('#dynamic-buttons button'))
+                    .find(b => b.innerText.includes('콘 터졌을 때'));
+
+                if (konBtn && !konBtn.classList.contains('active')) {
+                    // 기존 노란 버튼이 있으면 끄고, 콘 버튼만 켜기 (처음 한 번만!)
+                    if (activeButton && activeButton !== konBtn) {
+                        activeButton.classList.remove('active');
+                    }
+                    konBtn.classList.add('active');
+                    activeButton = konBtn;  // 이걸로 stopAudio에서도 꺼지게 보장
+                }
+                // 여기까지
+
+                currentAudio.onended = () => {
+                    playOneRandomKon();  // 다음 곡 재생 (이때는 더 이상 색상 건드리지 않음!)
+                };
+
+            currentAudio.play();
         }
     </script>
 </head>

@@ -257,6 +257,12 @@
             transform: scale(1.1);
             box-shadow: 0 0 20px #fff !important;
         }
+        /* 랜덤 테마가 적용될 때 */
+        body.random-theme {
+            --main-color: #FF1493;     /* 이건 자바스크립트에서 동적으로 바꿀거임 */
+            --hover-color: #FF69B4;
+            --active-color: #FFD700;
+        }
     </style>
     <script>
         let timers = [];
@@ -604,51 +610,54 @@
             currentAudio.play();
         }
 
-        // 테마 전환 함수 (기존거 이걸로 교체!)
-        function toggleTheme() {
-            const isBoy = document.body.classList.toggle('boy-theme');
+        // 미친듯이 랜덤 색상 생성 + 저장
+        function randomTheme() {
+            // 완전 랜덤 색상 3개 생성
+            const main = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+            const hover = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+            const active = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+
+            // CSS 변수 강제로 바꾸기
+            document.documentElement.style.setProperty('--main-color', main);
+            document.documentElement.style.setProperty('--hover-color', hover);
+            document.documentElement.style.setProperty('--active-color', active);
+
+            // 버튼도 그 색 따라가게
             const btn = document.querySelector('.theme-toggle');
-            
-            if (isBoy) {
-                btn.textContent = '블루';
-                btn.style.background = 'linear-gradient(45deg, #0066FF, #00FFFF)';
-                localStorage.setItem('theme', 'boy');        // 여기 저장
-            } else {
-                btn.textContent = '핑크';
-                btn.style.background = 'linear-gradient(45deg, #FF1493, #FF69B4)';
-                localStorage.setItem('theme', 'girl');       // 여기 저장
-            }
+            btn.style.background = `linear-gradient(45deg, ${main}, ${hover})`;
+            btn.style.borderColor = active;
+            btn.textContent = '랜덤';
+
+            // 새로고침해도 유지되게 저장
+            localStorage.setItem('randomMain', main);
+            localStorage.setItem('randomHover', hover);
+            localStorage.setItem('randomActive', active);
         }
 
-        // 페이지 로드될 때 저장된 테마 적용 (기존 window.onload에 이거 추가!)
+        // 페이지 로드 시 저장된 랜덤 색상 복구
         window.onload = function() {
-            // 기존 코드들 그대로 두고...
-            modal.element = document.getElementById('modal-window');
-            modal.iframe = modal.element.querySelector('iframe');
-            modal.closeButton = modal.element.querySelector('.close-modal');
-            modal.closeButton.onclick = closeModal;
+            // 기존 onload 코드들 그대로...
 
-            // ★ 이 부분만 추가 ★
-            const savedTheme = localStorage.getItem('theme');
-            const toggleBtn = document.querySelector('.theme-toggle');
-            
-            if (savedTheme === 'boy') {
-                document.body.classList.add('boy-theme');
-                toggleBtn.textContent = '블루';
-                toggleBtn.style.background = 'linear-gradient(45deg, #0066FF, #00FFFF)';
-            } else {
-                // 기본은 여자모드
-                document.body.classList.remove('boy-theme');
-                toggleBtn.textContent = '핑크';
-                toggleBtn.style.background = 'linear-gradient(45deg, #FF1493, #FF69B4)';
+            const savedMain = localStorage.getItem('randomMain');
+            const savedHover = localStorage.getItem('randomHover');
+            const savedActive = localStorage.getItem('randomActive');
+
+            if (savedMain && savedHover && savedActive) {
+                document.documentElement.style.setProperty('--main-color', savedMain);
+                document.documentElement.style.setProperty('--hover-color', savedHover);
+                document.documentElement.style.setProperty('--active-color', savedActive);
+
+                const btn = document.querySelector('.theme-toggle');
+                btn.style.background = `linear-gradient(45deg, ${savedMain}, ${savedHover})`;
+                btn.style.borderColor = savedActive;
+                btn.textContent = '랜덤';
             }
         };
     </script>
 </head>
 <body>
     <!-- 테마 전환 버튼 (왼쪽 위에 생김) -->
-    <button class="theme-toggle" onclick="toggleTheme()">
-        블루 / 핑크
+    <button class="theme-toggle" onclick="randomTheme()">랜덤</button>
     </button>
     <div class="canvas">
         <div class="bottom-right">
